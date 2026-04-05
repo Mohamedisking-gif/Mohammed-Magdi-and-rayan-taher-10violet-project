@@ -1,13 +1,28 @@
-body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; transition: background 0.5s; }
 .container { text-align: center; }
-#myBoard { width: 400px; margin: 20px auto; border: 3px solid #444; }
-.status { margin: 10px; font-weight: bold; color: #00ffcc; }
-button { background: #00ffcc; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+#myBoard { width: 400px; margin: 20px auto; border: 5px solid #333; }
+.status { margin: 10px; font-weight: bold; color: #00ffcc; text-transform: uppercase; }
+button { background: #00ffcc; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
 
-/* FIX: This makes the green highlight vanish when we remove the class */
-.highlight-hint {
-    background-color: rgba(0, 255, 204, 0.5) !important;
+/* THE DOTS: This creates a small circle in the center of the square */
+.highlight-hint::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 15px;
+    height: 15px;
+    background-color: rgba(0, 255, 204, 0.6);
+    border-radius: 50%;
+    pointer-events: none; /* Let clicks pass through to the piece */
 }
+
+/* SCARY THEME: For Level 3 */
+body.scary-mode { background: #330000; }
+body.scary-mode .status { color: #ff0000; text-shadow: 0 0 10px red; }
+body.scary-mode #myBoard { border-color: #660000; box-shadow: 0 0 30px rgba(255,0,0,0.5); }
+body.scary-mode .highlight-hint::after { background-color: rgba(255, 0, 0, 0.8); }
 
 #jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
 #scare-img { width: 100%; height: 100%; object-fit: cover; }
