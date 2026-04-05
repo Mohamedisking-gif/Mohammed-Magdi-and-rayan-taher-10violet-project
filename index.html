@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess: Ahmed El Addawy Challenge</title>
+    <title>Chess: The Addawy Challenge</title>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -14,18 +14,30 @@
     </div>
 
     <div class="container">
-        <h1>Chess vs. Ahmed El Addawy</h1>
-        <div class="menu">
-            <label>Difficulty:</label>
-            <select id="level">
-                <option value="1">Level 1: Easy</option>
-                <option value="2">Level 2: Normal</option>
-                <option value="3">Level 3: IMPOSSIBLE</option>
-            </select>
-            <button id="startBtn">Restart Game</button>
+        <div class="header">
+            <h1>Chess vs. Ahmed El Addawy</h1>
+            <p id="boss-subtitle">Current Boss: Grandmaster Ahmed</p>
         </div>
+        
+        <div class="menu">
+            <div class="input-group">
+                <label for="level">Difficulty:</label>
+                <select id="level">
+                    <option value="1">Level 1: Easy</option>
+                    <option value="2">Level 2: Smart</option>
+                    <option value="3">Level 3: IMPOSSIBLE (SCARY)</option>
+                </select>
+            </div>
+            <button id="startBtn">Restart Match</button>
+        </div>
+
         <div id="status" class="status">Your Turn</div>
+        
         <div id="myBoard"></div>
+
+        <div class="footer-hint">
+            <p>Hover over a piece to see legal moves (dots).</p>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
