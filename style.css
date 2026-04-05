@@ -1,55 +1,13 @@
-body {
-    background: #0f0f0f;
-    color: white;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-}
-
+body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
 .container { text-align: center; }
+#myBoard { width: 400px; margin: 20px auto; border: 3px solid #444; }
+.status { margin: 10px; font-weight: bold; color: #00ffcc; }
+button { background: #00ffcc; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 5px; }
 
-#myBoard {
-    width: 400px;
-    margin: 20px auto;
-    border: 3px solid #333;
-}
-
-.status {
-    margin: 10px;
-    font-weight: bold;
-    color: #00ffcc;
-}
-
-.menu { margin-bottom: 20px; }
-
-select, button {
-    padding: 8px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-}
-
-button { background: #00ffcc; font-weight: bold; }
-
-/* Jumpscare Overlay */
-#jumpscare {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: black;
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
-
-#scare-img { width: 100%; height: 100%; object-fit: cover; }
-
-/* Move Highlighting Squares */
+/* FIX: This makes the green highlight vanish when we remove the class */
 .highlight-hint {
-    box-shadow: inset 0 0 3px 3px rgba(0, 255, 204, 0.5);
+    background-color: rgba(0, 255, 204, 0.5) !important;
 }
+
+#jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
+#scare-img { width: 100%; height: 100%; object-fit: cover; }
