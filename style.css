@@ -6,6 +6,8 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    margin: 0;
+    overflow: hidden;
 }
 
 .container { text-align: center; }
@@ -13,36 +15,39 @@ body {
 #myBoard {
     width: 400px;
     margin: 20px auto;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
 }
 
 #status {
     margin: 10px;
     font-weight: bold;
     color: #00ffcc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* move highlight */
 .highlight {
-    background: radial-gradient(circle, rgba(0,255,200,0.8) 20%, transparent 20%);
+    box-shadow: inset 0 0 3px 3px rgba(0, 255, 200, 0.8);
 }
 
 /* scary mode */
 body.scary {
     background: #200000;
-    animation: shake 0.15s infinite;
+    animation: shake 0.1s infinite;
 }
 
 @keyframes shake {
-    0% { transform: translate(2px,2px); }
-    50% { transform: translate(-2px,-2px); }
-    100% { transform: translate(2px,-2px); }
+    0% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, -1px); }
+    100% { transform: translate(1px, -1px); }
 }
 
 #jumpscare {
     display: none;
     position: fixed;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: black;
     top: 0;
     left: 0;
@@ -54,5 +59,7 @@ body.scary {
 #jumpscare img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+}
     object-fit: cover;
 }
