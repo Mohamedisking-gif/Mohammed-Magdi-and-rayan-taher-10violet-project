@@ -1,85 +1,194 @@
-var board = null;
+var board;
 var game = new Chess();
-var $status = $('#status');
+var selectedSquare = null;
 
+// 🔊 VOICE
+function speak(text) {
+    speechSynthesis.cancel();
+
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.rate = 1;
+    msg.pitch = 0.7;
+
+    speechSynthesis.speak(msg);
+}
+
+// 👨‍🏫 SMART TEACHER TALK
+function getTeacherLine() {
+    let score = evaluateBoard(game);
+
+    if (game.in_checkmate()) return "You failed the exam.";
+
+    if (score > 5) return "This is embarrassing.";
+    if (score > 2) return "Too many mistakes.";
+    if (score > 0) return "Not good.";
+    if (score === 0) return "Acceptable.";
+    if (score < 0) return "Hmm... improving.";
+
+    return "Focus.";
+}
+
+// 🎯 HIGHLIGHTS
 function removeHighlights() {
-    $('#myBoard .square-55d60').removeClass('highlight-hint');
+    $('#myBoard .square-55d63').removeClass('highlight');
 }
 
-$('#level').on('change', function() {
-    if ($(this).val() === "3") { $('body').addClass('scary-mode'); } 
-    else { $('body').removeClass('scary-mode'); }
-});
+function onClickSquare(square, piece) {
+    removeHighlights();
 
-function onMouseoverSquare(square, piece) {
-    removeHighlights(); // Clear old ones first!
-    var moves = game.moves({ square: square, verbose: true });
-    if (moves.length === 0) return;
-    
-    for (var i = 0; i < moves.length; i++) {
-        $('#myBoard .square-' + moves[i].to).addClass('highlight-hint');
+    if (!piece || piece[0] !== 'w') return;
+
+    selectedSquare = square;
+
+    let moves = game.moves({
+        square: square,
+        verbose: true
+    });
+
+    moves.forEach(m => {
+        $('#myBoard .square-' + m.to).addClass('highlight');
+    });
+}
+
+// 🧠 AI
+function minimax(depth, game, isMax) {
+    if (depth === 0) return evaluateBoard(game);
+
+    let moves = game.moves();
+
+    if (isMax) {
+        let best = -9999;
+        for (let m of moves) {
+            game.move(m);
+            best = Math.max(best, minimax(depth - 1, game, false));
+            game.undo();
+        }
+        return best;
+    } else {
+        let best = 9999;
+        for (let m of moves) {
+            game.move(m);
+            best = Math.min(best, minimax(depth - 1, game, true));
+            game.undo();
+        }
+        return best;
     }
 }
 
-function onMouseoutSquare() {
-    removeHighlights();
+function getBestMove(depth) {
+    let bestMove = null;
+    let bestValue = -9999;
+
+    game.moves().forEach(m => {
+        game.move(m);
+        let value = minimax(depth - 1, game, false);
+        game.undo();
+
+        if (value > bestValue) {
+            bestValue = value;
+            bestMove = m;
+        }
+    });
+
+    return bestMove;
 }
 
+// ♟️ BOARD VALUE
+function evaluateBoard(game) {
+    const val = { p:1, n:3, b:3, r:5, q:9, k:0 };
+    let total = 0;
+
+    game.board().forEach(row => {
+        row.forEach(piece => {
+            if (piece) {
+                total += piece.color === 'w' ? val[piece.type] : -val[piece.type];
+            }
+        });
+    });
+
+    return total;
+}
+
+// 🤖 AI MOVE
 function makeMove() {
-    removeHighlights();
-    var moves = game.moves();
-    if (game.game_over()) { checkEnd(); return; }
+    if (game.game_over()) return endGame();
 
-    var level = $('#level').val();
-    var move = (level === "1") ? moves[Math.floor(Math.random() * moves.length)] : getBestMove(moves);
+    let level = $('#level').val();
+    let depth = level == 1 ? 1 : level == 2 ? 2 : 3;
 
+    let move = getBestMove(depth);
     game.move(move);
+
     board.position(game.fen());
+
+    speak(getTeacherLine());
+
     updateStatus();
-    if (game.game_over()) checkEnd();
+
+    if (game.game_over()) endGame();
 }
 
-function getBestMove(moves) {
-    for(var i=0; i<moves.length; i++) {
-        if (moves[i].includes('x') || moves[i].includes('#')) return moves[i];
-    }
-    return moves[Math.floor(Math.random() * moves.length)];
-}
+// 💀 END GAME
+function endGame() {
+    speak("Game over.");
 
-function checkEnd() {
     if ($('#level').val() === "3") {
-        setTimeout(triggerScare, 500);
+        document.body.classList.add('scary');
+
+        document.getElementById('scare-audio').play().catch(()=>{});
+        $('#jumpscare').css('display', 'flex');
+
+        setTimeout(() => location.reload(), 4000);
     }
 }
 
-function triggerScare() {
-    $('#jumpscare').css('display', 'flex');
-    document.getElementById('scare-audio').play();
-    setTimeout(() => { location.reload(); }, 3000);
-}
-
+// 📊 STATUS
 function updateStatus() {
-    var status = game.turn() === 'b' ? "Ahmed's Turn" : "Your Turn";
-    if (game.in_checkmate()) status = "GAME OVER";
-    $status.html(status);
+    let status = game.turn() === 'w' ? "Your Turn" : "Ahmed Thinking...";
+    if (game.in_checkmate()) status = "CHECKMATE 💀";
+    $('#status').text(status);
 }
 
-var config = {
+// ♟️ BOARD INIT
+board = Chessboard('myBoard', {
     draggable: true,
     position: 'start',
-    onDragStart: (s, p) => { if (game.game_over() || p.search(/^b/) !== -1) return false },
-    onDrop: (source, target) => {
-        var move = game.move({ from: source, to: target, promotion: 'q' });
-        if (move === null) return 'snapback';
+
+    onDragStart: function (s, p) {
+        if (game.game_over()) return false;
+        if (p.search(/^b/) !== -1) return false;
+    },
+
+    onDrop: function (source, target) {
         removeHighlights();
-        window.setTimeout(makeMove, 250);
+
+        let move = game.move({
+            from: source,
+            to: target,
+            promotion: 'q'
+        });
+
+        if (move === null) return 'snapback';
+
+        speak("Hmm...");
+
+        setTimeout(makeMove, 250);
         updateStatus();
     },
-    onSnapEnd: () => { board.position(game.fen()); removeHighlights(); },
-    onMouseoverSquare: onMouseoverSquare,
-    onMouseoutSquare: onMouseoutSquare,
-    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-};
 
-board = Chessboard('myBoard', config);
-$('#startBtn').on('click', function() { game.reset(); board.start(); updateStatus(); removeHighlights(); });
+    onMouseoverSquare: onClickSquare,
+
+    onSnapEnd: function () {
+        board.position(game.fen());
+    }
+});
+
+// 🔁 RESTART
+$('#startBtn').on('click', function () {
+    game.reset();
+    board.start();
+    updateStatus();
+    removeHighlights();
+
+    speak("Let's begin.");
+});
