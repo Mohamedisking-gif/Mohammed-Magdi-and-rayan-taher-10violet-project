@@ -2,26 +2,23 @@ var board = null;
 var game = new Chess();
 var $status = $('#status');
 
-// --- 1. HIGHLIGHTING LOGIC ---
+// --- 1. HIGHLIGHTING LOGIC (The "Eraser") ---
 
 function removeHighlights() {
+    // This targets the specific class we use for hints
     $('#myBoard .square-55d60').removeClass('highlight-hint');
 }
 
 function onMouseoverSquare(square, piece) {
-    // get list of possible moves for this square
     var moves = game.moves({
         square: square,
         verbose: true
     });
 
-    // exit if there are no moves available for this square
     if (moves.length === 0) return;
 
-    // highlight the square they hovered over
     $('#myBoard .square-' + square).addClass('highlight-hint');
 
-    // highlight the possible squares for this piece
     for (var i = 0; i < moves.length; i++) {
         $('#myBoard .square-' + moves[i].to).addClass('highlight-hint');
     }
@@ -34,7 +31,7 @@ function onMouseoutSquare(square, piece) {
 // --- 2. AI & LEVELS LOGIC ---
 
 function makeMove() {
-    removeHighlights(); // Ensure board is clean before AI moves
+    removeHighlights(); 
     var moves = game.moves();
     if (game.game_over()) return;
 
@@ -42,13 +39,11 @@ function makeMove() {
     var move;
 
     if (level === "1") {
-        // Level 1: Random (Easy)
         move = moves[Math.floor(Math.random() * moves.length)];
     } else if (level === "2") {
-        // Level 2: Smart (Captures/Checkmates)
         move = getBestMove(moves);
     } else {
-        // Level 3: Impossible (Deep Search)
+        // Level 3: Ahmed is in "Impossible" mode
         move = getImpossibleMove(game);
     }
 
@@ -56,13 +51,11 @@ function makeMove() {
     board.position(game.fen());
     updateStatus();
 
-    // Check for Jumpscare if User loses on Level 3
     if (game.in_checkmate() && level === "3") {
         setTimeout(scare, 400);
     }
 }
 
-// Basic capture-logic for Level 2
 function getBestMove(moves) {
     for (var i = 0; i < moves.length; i++) {
         if (moves[i].includes('x') || moves[i].includes('#')) return moves[i];
@@ -70,7 +63,6 @@ function getBestMove(moves) {
     return moves[Math.floor(Math.random() * moves.length)];
 }
 
-// Simple Minimax for Level 3 "Impossible"
 function getImpossibleMove(game) {
     var moves = game.moves();
     var bestMove = null;
@@ -92,28 +84,20 @@ function evaluateBoard(board) {
     var totalEvaluation = 0;
     for (var i = 0; i < 8; i++) {
         for (var j = 0; j < 8; j++) {
-            totalEvaluation += getPieceValue(board[i][j], i, j);
+            var piece = board[i][j];
+            if (piece) {
+                var val = (piece.type === 'p') ? 10 : (piece.type === 'r') ? 50 : (piece.type === 'n') ? 30 : (piece.type === 'b') ? 30 : (piece.type === 'q') ? 90 : 900;
+                totalEvaluation += (piece.color === 'w' ? val : -val);
+            }
         }
     }
     return totalEvaluation;
 }
 
-function getPieceValue(piece) {
-    if (piece === null) return 0;
-    var val = 0;
-    if (piece.type === 'p') val = 10;
-    else if (piece.type === 'r') val = 50;
-    else if (piece.type === 'n') val = 30;
-    else if (piece.type === 'b') val = 30;
-    else if (piece.type === 'q') val = 90;
-    else if (piece.type === 'k') val = 900;
-    return piece.color === 'w' ? val : -val;
-}
-
 // --- 3. CORE GAME FUNCTIONS ---
 
 function onDrop(source, target) {
-    removeHighlights(); // FIX: Clear highlights as soon as piece is dropped
+    removeHighlights(); // Wipe highlights as soon as you let go
 
     var move = game.move({
         from: source,
@@ -127,6 +111,12 @@ function onDrop(source, target) {
     updateStatus();
 }
 
+// THIS IS THE FIX: It clears highlights after the animation finishes
+function onSnapEnd() {
+    board.position(game.fen());
+    removeHighlights(); 
+}
+
 function updateStatus() {
     var status = game.turn() === 'b' ? "Ahmed is thinking..." : "Your turn";
     if (game.in_checkmate()) status = "CHECKMATE!";
@@ -137,7 +127,7 @@ function updateStatus() {
 function scare() {
     $('#jumpscare').css('display', 'flex');
     var audio = document.getElementById('scare-audio');
-    audio.play().catch(e => console.log("Audio play blocked until user clicks board"));
+    audio.play().catch(e => console.log("Audio play blocked"));
     setTimeout(() => {
         location.reload();
     }, 2500);
@@ -152,6 +142,7 @@ var config = {
         if (game.game_over() || p.search(/^b/) !== -1) return false;
     },
     onDrop: onDrop,
+    onSnapEnd: onSnapEnd, // Added the snapback/animation cleanup
     onMouseoutSquare: onMouseoutSquare,
     onMouseoverSquare: onMouseoverSquare,
     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
