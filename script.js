@@ -3,34 +3,58 @@ var game = new Chess();
 var $status = $('#status');
 
 function removeHighlights() {
-    $('#myBoard .square-55d60').removeClass('highlight-hint');
+    $('.square-55d60').removeClass('highlight-hint');
 }
+
+// LEVEL SELECTOR CHANGE: Update theme instantly
+$('#level').on('change', function() {
+    if ($(this).val() === "3") {
+        $('body').addClass('scary-mode');
+    } else {
+        $('body').removeClass('scary-mode');
+    }
+});
 
 function onMouseoverSquare(square) {
     var moves = game.moves({ square: square, verbose: true });
     if (moves.length === 0) return;
+    
+    // Dot on the piece you are holding
     $('#myBoard .square-' + square).addClass('highlight-hint');
+    // Dots on target squares
     for (var i = 0; i < moves.length; i++) {
         $('#myBoard .square-' + moves[i].to).addClass('highlight-hint');
     }
 }
 
 function onMouseoutSquare() {
+    removeHighlights(); // Dots disappear when cursor leaves square
+}
+
+function onDrop(source, target) {
     removeHighlights();
+    var move = game.move({ from: source, to: target, promotion: 'q' });
+    if (move === null) return 'snapback';
+
+    window.setTimeout(makeMove, 250);
+    updateStatus();
 }
 
 function makeMove() {
     removeHighlights();
-    var moves = game.moves();
-    if (game.game_over()) return;
+    if (game.game_over()) {
+        checkGameOver();
+        return;
+    }
 
     var level = $('#level').val();
+    var moves = game.moves();
     var move;
 
     if (level === "1") {
         move = moves[Math.floor(Math.random() * moves.length)];
     } else {
-        // AI Logic for Level 2 and 3
+        // Impossible AI logic
         var bestMove = null;
         var bestValue = Infinity;
         for (var i = 0; i < moves.length; i++) {
@@ -48,9 +72,17 @@ function makeMove() {
     game.move(move);
     board.position(game.fen());
     updateStatus();
+    
+    if (game.game_over()) {
+        checkGameOver();
+    }
+}
 
-    if (game.in_checkmate() && level === "3") {
-        setTimeout(scare, 300);
+function checkGameOver() {
+    var level = $('#level').val();
+    // Level 3 Rule: Lose OR Win = Jumpscare
+    if (level === "3") {
+        setTimeout(scare, 500);
     }
 }
 
@@ -68,19 +100,6 @@ function evaluateBoard(board) {
     return total;
 }
 
-function onDrop(source, target) {
-    removeHighlights();
-    var move = game.move({ from: source, to: target, promotion: 'q' });
-    if (move === null) return 'snapback';
-    window.setTimeout(makeMove, 250);
-    updateStatus();
-}
-
-function onSnapEnd() {
-    board.position(game.fen());
-    removeHighlights();
-}
-
 function scare() {
     $('#jumpscare').css('display', 'flex');
     document.getElementById('scare-audio').play();
@@ -89,7 +108,7 @@ function scare() {
 
 function updateStatus() {
     var status = game.turn() === 'b' ? "Ahmed's Turn" : "Your Turn";
-    if (game.in_checkmate()) status = "CHECKMATE!";
+    if (game.in_checkmate()) status = "GAME OVER";
     $status.html(status);
 }
 
@@ -98,7 +117,7 @@ var config = {
     position: 'start',
     onDragStart: (s, p) => { if (game.game_over() || p.search(/^b/) !== -1) return false },
     onDrop: onDrop,
-    onSnapEnd: onSnapEnd,
+    onSnapEnd: () => { board.position(game.fen()); removeHighlights(); },
     onMouseoutSquare: onMouseoutSquare,
     onMouseoverSquare: onMouseoverSquare,
     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
