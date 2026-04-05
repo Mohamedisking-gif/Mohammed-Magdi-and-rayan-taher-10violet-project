@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess vs Ahmed</title>
-
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="jumpscare">
-    <img src="https://media.tenor.com/x8v1oNUOmg4AAAAC/jumpscare.gif">
+    <img src="https://media.tenor.com/x8v1oNUOmg4AAAAC/jumpscare.gif" alt="Scare">
     <audio id="scare-audio" src="https://www.soundjay.com/human/scream-01.mp3"></audio>
 </div>
 
@@ -21,7 +21,7 @@
         <select id="level">
             <option value="1">Level 1: Easy</option>
             <option value="2">Level 2: Medium</option>
-            <option value="3">Level 3: FINAL EXAM 💀</option>
+            <option value="3" selected>Level 3: FINAL EXAM 💀</option>
         </select>
         <button id="startBtn">Restart</button>
     </div>
@@ -33,7 +33,6 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-
 <script src="script.js"></script>
 </body>
 </html>
