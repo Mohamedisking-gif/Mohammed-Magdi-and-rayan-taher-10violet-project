@@ -1,24 +1,20 @@
 var board;
 var game = new Chess();
-var selectedSquare = null;
 
-// 🔊 VOICE
+// 🔊 VOICE (safe & simple)
 function speak(text) {
     speechSynthesis.cancel();
-
     const msg = new SpeechSynthesisUtterance(text);
     msg.rate = 1;
-    msg.pitch = 0.7;
-
+    msg.pitch = 0.8;
     speechSynthesis.speak(msg);
 }
 
-// 👨‍🏫 SMART TEACHER TALK
+// 👨‍🏫 SMART TEACHER LINES
 function getTeacherLine() {
-    let score = evaluateBoard(game);
+    let score = evaluateBoard();
 
     if (game.in_checkmate()) return "You failed the exam.";
-
     if (score > 5) return "This is embarrassing.";
     if (score > 2) return "Too many mistakes.";
     if (score > 0) return "Not good.";
@@ -28,17 +24,16 @@ function getTeacherLine() {
     return "Focus.";
 }
 
-// 🎯 HIGHLIGHTS
+// 🎯 HIGHLIGHT MOVES
 function removeHighlights() {
     $('#myBoard .square-55d63').removeClass('highlight');
 }
 
-function onClickSquare(square, piece) {
+function showMoves(square, piece) {
     removeHighlights();
 
+    // only allow white pieces
     if (!piece || piece[0] !== 'w') return;
-
-    selectedSquare = square;
 
     let moves = game.moves({
         square: square,
@@ -50,9 +45,9 @@ function onClickSquare(square, piece) {
     });
 }
 
-// 🧠 AI
-function minimax(depth, game, isMax) {
-    if (depth === 0) return evaluateBoard(game);
+// 🧠 MINIMAX AI
+function minimax(depth, isMax) {
+    if (depth === 0) return evaluateBoard();
 
     let moves = game.moves();
 
@@ -60,7 +55,7 @@ function minimax(depth, game, isMax) {
         let best = -9999;
         for (let m of moves) {
             game.move(m);
-            best = Math.max(best, minimax(depth - 1, game, false));
+            best = Math.max(best, minimax(depth - 1, false));
             game.undo();
         }
         return best;
@@ -68,7 +63,7 @@ function minimax(depth, game, isMax) {
         let best = 9999;
         for (let m of moves) {
             game.move(m);
-            best = Math.min(best, minimax(depth - 1, game, true));
+            best = Math.min(best, minimax(depth - 1, true));
             game.undo();
         }
         return best;
@@ -79,32 +74,38 @@ function getBestMove(depth) {
     let bestMove = null;
     let bestValue = -9999;
 
-    game.moves().forEach(m => {
+    let moves = game.moves();
+
+    for (let m of moves) {
         game.move(m);
-        let value = minimax(depth - 1, game, false);
+        let value = minimax(depth - 1, false);
         game.undo();
 
         if (value > bestValue) {
             bestValue = value;
             bestMove = m;
         }
-    });
+    }
 
     return bestMove;
 }
 
-// ♟️ BOARD VALUE
-function evaluateBoard(game) {
+// ♟️ BOARD EVALUATION
+function evaluateBoard() {
     const val = { p:1, n:3, b:3, r:5, q:9, k:0 };
     let total = 0;
 
-    game.board().forEach(row => {
-        row.forEach(piece => {
+    let boardArr = game.board();
+
+    for (let row of boardArr) {
+        for (let piece of row) {
             if (piece) {
-                total += piece.color === 'w' ? val[piece.type] : -val[piece.type];
+                total += piece.color === 'w'
+                    ? val[piece.type]
+                    : -val[piece.type];
             }
-        });
-    });
+        }
+    }
 
     return total;
 }
@@ -122,7 +123,6 @@ function makeMove() {
     board.position(game.fen());
 
     speak(getTeacherLine());
-
     updateStatus();
 
     if (game.game_over()) endGame();
@@ -149,14 +149,17 @@ function updateStatus() {
     $('#status').text(status);
 }
 
-// ♟️ BOARD INIT
+// ♟️ INIT BOARD (FIXED PIECES HERE)
 board = Chessboard('myBoard', {
     draggable: true,
     position: 'start',
 
-    onDragStart: function (s, p) {
+    // ✅ THIS FIXES YOUR BROKEN PIECES
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+
+    onDragStart: function (source, piece) {
         if (game.game_over()) return false;
-        if (p.search(/^b/) !== -1) return false;
+        if (piece.search(/^b/) !== -1) return false;
     },
 
     onDrop: function (source, target) {
@@ -171,12 +174,14 @@ board = Chessboard('myBoard', {
         if (move === null) return 'snapback';
 
         speak("Hmm...");
+        updateStatus();
 
         setTimeout(makeMove, 250);
-        updateStatus();
     },
 
-    onMouseoverSquare: onClickSquare,
+    onMouseoverSquare: showMoves,
+
+    onMouseoutSquare: removeHighlights,
 
     onSnapEnd: function () {
         board.position(game.fen());
@@ -187,8 +192,8 @@ board = Chessboard('myBoard', {
 $('#startBtn').on('click', function () {
     game.reset();
     board.start();
-    updateStatus();
     removeHighlights();
+    updateStatus();
 
     speak("Let's begin.");
 });
