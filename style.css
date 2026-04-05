@@ -1,28 +1,26 @@
-body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; transition: background 0.5s; }
+body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; transition: 0.5s; }
 .container { text-align: center; }
-#myBoard { width: 400px; margin: 20px auto; border: 5px solid #333; }
-.status { margin: 10px; font-weight: bold; color: #00ffcc; text-transform: uppercase; }
-button { background: #00ffcc; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+#myBoard { width: 400px; margin: 20px auto; border: 4px solid #333; }
+.status { margin: 10px; font-weight: bold; color: #00ffcc; }
 
-/* THE DOTS: This creates a small circle in the center of the square */
+/* The Dot Logic */
+.highlight-hint {
+    position: relative;
+}
 .highlight-hint::after {
-    content: '';
+    content: "";
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 15px;
-    height: 15px;
-    background-color: rgba(0, 255, 204, 0.6);
+    width: 12px; height: 12px;
+    background: rgba(0, 255, 204, 0.7);
     border-radius: 50%;
-    pointer-events: none; /* Let clicks pass through to the piece */
+    z-index: 999;
 }
 
-/* SCARY THEME: For Level 3 */
-body.scary-mode { background: #330000; }
-body.scary-mode .status { color: #ff0000; text-shadow: 0 0 10px red; }
-body.scary-mode #myBoard { border-color: #660000; box-shadow: 0 0 30px rgba(255,0,0,0.5); }
-body.scary-mode .highlight-hint::after { background-color: rgba(255, 0, 0, 0.8); }
+/* Level 3 Scary Theme */
+body.scary-mode { background: #2b0000; }
+body.scary-mode .highlight-hint::after { background: rgba(255, 0, 0, 0.8); }
 
-#jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
+#jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 10000; justify-content: center; align-items: center; }
 #scare-img { width: 100%; height: 100%; object-fit: cover; }
