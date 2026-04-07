@@ -1,40 +1,45 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess vs Ahmed</title>
+
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="jumpscare">
-    <div class="congrats-text">EXAM PASSED! 🎉</div>
-    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueGZ3bmZ6eXJ6eXJ6eXJ6eXJ6eXJ6eXJ6eXJ6eXJ6eXJ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/g9582DNuQppxC/giphy.gif" alt="Victory">
-    <audio id="scare-audio" src="https://www.myinstants.com/media/sounds/final-fantasy-vii-victory-fanfare-official.mp3"></audio>
+<!-- RESULT GIF -->
+<div id="resultScreen">
+    <img id="resultGif">
 </div>
 
 <div class="container">
-    <h1>Chess vs Ahmed 👨‍🏫</h1>
 
-    <div class="menu">
+    <!-- BOARD -->
+    <div id="myBoard"></div>
+
+    <!-- SIDE PANEL -->
+    <div class="panel">
+        <h1>Chess vs Ahmed 👨‍🏫</h1>
+
         <select id="level">
-            <option value="1">Level 1: Easy</option>
-            <option value="2">Level 2: Medium</option>
-            <option value="3">Level 3: FINAL EXAM 💀</option>
+            <option value="1">Easy</option>
+            <option value="2">Medium</option>
+            <option value="3">FINAL EXAM 💀</option>
         </select>
-        <button id="startBtn">Start/Restart Exam</button>
+
+        <button id="startBtn">Restart</button>
+
+        <div id="status">Your Turn</div>
     </div>
 
-    <div id="status">Click Restart to Begin</div>
-    <div id="myBoard"></div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
 <script src="script.js"></script>
 </body>
 </html>
