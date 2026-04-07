@@ -1,153 +1,177 @@
 var board;
 var game = new Chess();
 
- VOICE ENGINE
+// 🔊 voice
 function speak(text) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.pitch = 0.8;
-        msg.rate = 0.9;
-        window.speechSynthesis.speak(msg);
-    }
+    speechSynthesis.cancel();
+    let msg = new SpeechSynthesisUtterance(text);
+    msg.pitch = 0.8;
+    speechSynthesis.speak(msg);
 }
 
- PIECE VALUES
-const weights = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
+// 🎬 GIF RESULT
+function showResult(type) {
+    const screen = document.getElementById("resultScreen");
+    const gif = document.getElementById("resultGif");
 
-function evaluateBoard(gameInstance) {
-    let total = 0;
-    gameInstance.board().forEach(row => {
-        row.forEach(piece => {
-            if (piece) {
-                let val = weights[piece.type];
-                total += (piece.color === 'w' ? val : -val);
-            }
-        });
-    });
-    return total;
-}
-
- MINIMAX ALGORITHM (Logical Thinking)
-function minimax(gameInstance, depth, isMaximizingPlayer) {
-    if (depth === 0 || gameInstance.game_over()) {
-        return evaluateBoard(gameInstance);
-    }
-
-    let moves = gameInstance.moves();
-
-    if (isMaximizingPlayer) {
-        let bestScore = -Infinity;
-        for (let move of moves) {
-            gameInstance.move(move);
-            bestScore = Math.max(bestScore, minimax(gameInstance, depth - 1, false));
-            gameInstance.undo();
-        }
-        return bestScore;
+    if (type === "win") {
+        gif.src = "https://media.tenor.com/2roX3uxz_68AAAAC/winner.gif";
     } else {
-        let bestScore = Infinity;
-        for (let move of moves) {
-            gameInstance.move(move);
-            bestScore = Math.min(bestScore, minimax(gameInstance, depth - 1, true));
-            gameInstance.undo();
+        gif.src = "https://media.tenor.com/o7Bpr6QZQxIAAAAC/sad-cry.gif";
+    }
+
+    screen.style.display = "flex";
+
+    setTimeout(() => location.reload(), 4000);
+}
+
+// 🎯 highlight
+function removeHighlights() {
+    $('#myBoard .square-55d63').removeClass('highlight');
+}
+
+function showMoves(square, piece) {
+    removeHighlights();
+    if (!piece || piece[0] !== 'w') return;
+
+    let moves = game.moves({ square: square, verbose: true });
+
+    moves.forEach(m => {
+        $('#myBoard .square-' + m.to).addClass('highlight');
+    });
+}
+
+// 🧠 AI
+function minimax(depth, isMax) {
+    if (depth === 0) return evaluateBoard();
+
+    let moves = game.moves();
+
+    if (isMax) {
+        let best = -9999;
+        for (let m of moves) {
+            game.move(m);
+            best = Math.max(best, minimax(depth - 1, false));
+            game.undo();
         }
-        return bestScore;
+        return best;
+    } else {
+        let best = 9999;
+        for (let m of moves) {
+            game.move(m);
+            best = Math.min(best, minimax(depth - 1, true));
+            game.undo();
+        }
+        return best;
     }
 }
 
-  GET BEST MOVE
-function getBestMove() {
-    let moves = game.moves();
+function getBestMove(depth) {
     let bestMove = null;
-    let bestValue = Infinity; // AI (Black) wants the lowest score possible
+    let bestValue = -9999;
 
-    // Depth based on user level selection
-    let depth = parseInt($('#level').val()) || 1;
-
-    moves.forEach(move => {
-        game.move(move);
-        let boardValue = minimax(game, depth - 1, true);
+    game.moves().forEach(m => {
+        game.move(m);
+        let val = minimax(depth - 1, false);
         game.undo();
-        if (boardValue < bestValue) {
-            bestValue = boardValue;
-            bestMove = move;
+
+        if (val > bestValue) {
+            bestValue = val;
+            bestMove = m;
         }
     });
+
     return bestMove;
 }
 
- TEACHER LINES
-function getTeacherLine() {
-    if (game.in_checkmate()) return "Checkmate. You failed the exam.";
-    if (game.in_check()) return "You are in check. Solve it.";
-    
-    let score = evaluateBoard(game);
-    if (score < -5) return "Impressive... but can you finish the game?";
-    if (score > 5) return "This performance is unacceptable.";
-    return "Think harder.";
+function evaluateBoard() {
+    const val = { p:1, n:3, b:3, r:5, q:9, k:0 };
+    let total = 0;
+
+    game.board().forEach(row => {
+        row.forEach(p => {
+            if (p) total += p.color === 'w' ? val[p.type] : -val[p.type];
+        });
+    });
+
+    return total;
 }
 
- AI EXECUTION
+// 🤖 AI move
 function makeMove() {
     if (game.game_over()) return endGame();
 
-    let move = getBestMove();
+    let depth = $('#level').val();
+    let move = getBestMove(depth);
+
     game.move(move);
     board.position(game.fen());
-    
+
+    speak("Your move is weak.");
     updateStatus();
-    speak(getTeacherLine());
 
     if (game.game_over()) endGame();
 }
 
- END GAME
+// 💀 end game
 function endGame() {
-    let playerWon = game.in_checkmate() && game.turn() === 'b';
-
-    if (playerWon) {
-        speak("A perfect score! You pass.");
-        const audio = document.getElementById('scare-audio');
-        audio.play().catch(() => {});
-        $('#jumpscare').css('display', 'flex');
-        setTimeout(() => location.reload(), 7000);
-    } else {
-        speak("Failed. Sit down.");
-        alert("Game Over: Ahmed Won.");
+    if (game.in_checkmate()) {
+        if (game.turn() === 'b') {
+            speak("Impossible... you passed.");
+            showResult("win");
+        } else {
+            speak("You failed.");
+            showResult("lose");
+        }
     }
 }
 
+// 📊 status
 function updateStatus() {
-    let status = game.turn() === 'w' ? "Your Turn" : "Ahmed is calculating...";
-    if (game.in_checkmate()) status = "FINISHED";
+    let status = game.turn() === 'w' ? "Your Turn" : "Ahmed Thinking...";
     $('#status').text(status);
 }
 
-// 🏁 BOARD SETUP
-var config = {
+// ♟️ board init (FIXED PIECES)
+board = Chessboard('myBoard', {
     draggable: true,
     position: 'start',
     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-    onDragStart: function (source, piece) {
-        if (game.game_over() || piece.search(/^b/) !== -1) return false;
+
+    onDragStart: function (s, p) {
+        if (game.game_over()) return false;
+        if (p.search(/^b/) !== -1) return false;
     },
+
     onDrop: function (source, target) {
-        let move = game.move({ from: source, to: target, promotion: 'q' });
+        removeHighlights();
+
+        let move = game.move({
+            from: source,
+            to: target,
+            promotion: 'q'
+        });
+
         if (move === null) return 'snapback';
 
+        speak("Hmm...");
         updateStatus();
-        window.setTimeout(makeMove, 500);
+
+        setTimeout(makeMove, 250);
     },
+
+    onMouseoverSquare: showMoves,
+    onMouseoutSquare: removeHighlights,
+
     onSnapEnd: function () {
         board.position(game.fen());
     }
-};
+});
 
-board = Chessboard('myBoard', config);
-
+// restart
 $('#startBtn').on('click', function () {
     game.reset();
     board.start();
     updateStatus();
-    speak("The final exam starts now.");
+    removeHighlights();
 });
