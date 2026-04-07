@@ -1,69 +1,95 @@
 body {
-    background: #0a0a0a;
+    background: #302e2b;
+    font-family: Arial, sans-serif;
     color: white;
-    font-family: 'Segoe UI', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
-    overflow: hidden;
 }
 
-.container { text-align: center; }
+/* layout */
+.container {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
 
+/* board */
 #myBoard {
-    width: 400px;
-    margin: 20px auto;
-    border: 4px solid #444;
-    border-radius: 4px;
+    width: 480px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px black;
+}
+
+/* side panel */
+.panel {
+    background: #262421;
+    padding: 20px;
+    border-radius: 10px;
+    width: 220px;
+}
+
+.panel h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
 }
 
 #status {
-    margin: 10px;
+    margin-top: 15px;
+    color: #81b64c;
     font-weight: bold;
-    color: #00ffcc;
-    font-size: 1.2rem;
 }
 
-/* Celebration Overlay */
-#jumpscare {
+/* buttons */
+select, button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    background: #3c3936;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4a4744;
+}
+
+/* move highlight */
+.highlight {
+    background: radial-gradient(circle, rgba(255,255,0,0.5) 20%, transparent 20%);
+}
+
+/* result screen */
+#resultScreen {
     display: none;
     position: fixed;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
     z-index: 9999;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-.congrats-text {
-    font-size: 4rem;
-    color: #ffd700;
-    font-weight: bold;
-    text-shadow: 0 0 30px gold;
-    margin-bottom: 20px;
+#resultGif {
+    width: 80%;
+    max-width: 600px;
+    border-radius: 10px;
 }
 
-#jumpscare img {
-    width: 90%;
-    max-width: 500px;
-    border: 8px solid gold;
-    border-radius: 20px;
+/* scary mode */
+body.scary {
+    animation: shake 0.15s infinite;
+    background: #200000;
 }
 
-/* Button Styling */
-button {
-    padding: 10px 20px;
-    cursor: pointer;
-    background: #00ffcc;
-    border: none;
-    font-weight: bold;
-    border-radius: 5px;
+@keyframes shake {
+    0% { transform: translate(2px,2px); }
+    50% { transform: translate(-2px,-2px); }
+    100% { transform: translate(2px,-2px); }
 }
-
-button:hover { background: #00ccaa; }
