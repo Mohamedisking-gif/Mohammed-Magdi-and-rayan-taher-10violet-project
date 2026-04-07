@@ -1,7 +1,7 @@
 var board;
 var game = new Chess();
 
-// 🔊 VOICE ENGINE
+ VOICE ENGINE
 function speak(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -12,7 +12,7 @@ function speak(text) {
     }
 }
 
-// 🧠 AI BRAIN: PIECE VALUES
+ PIECE VALUES
 const weights = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
 
 function evaluateBoard(gameInstance) {
@@ -28,7 +28,7 @@ function evaluateBoard(gameInstance) {
     return total;
 }
 
-// 🎯 MINIMAX ALGORITHM (Logical Thinking)
+ MINIMAX ALGORITHM (Logical Thinking)
 function minimax(gameInstance, depth, isMaximizingPlayer) {
     if (depth === 0 || gameInstance.game_over()) {
         return evaluateBoard(gameInstance);
@@ -55,7 +55,7 @@ function minimax(gameInstance, depth, isMaximizingPlayer) {
     }
 }
 
-// 🤖 GET BEST MOVE
+  GET BEST MOVE
 function getBestMove() {
     let moves = game.moves();
     let bestMove = null;
@@ -76,7 +76,7 @@ function getBestMove() {
     return bestMove;
 }
 
-// ♟️ TEACHER LINES
+ TEACHER LINES
 function getTeacherLine() {
     if (game.in_checkmate()) return "Checkmate. You failed the exam.";
     if (game.in_check()) return "You are in check. Solve it.";
@@ -87,7 +87,7 @@ function getTeacherLine() {
     return "Think harder.";
 }
 
-// ⚙️ AI EXECUTION
+ AI EXECUTION
 function makeMove() {
     if (game.game_over()) return endGame();
 
@@ -101,7 +101,7 @@ function makeMove() {
     if (game.game_over()) endGame();
 }
 
-// 🏆 END GAME
+ END GAME
 function endGame() {
     let playerWon = game.in_checkmate() && game.turn() === 'b';
 
